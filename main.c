@@ -1,4 +1,5 @@
 #include <math.h>
+#include <ddcMath.h>
 #include <ddcPrint.h>
 #include <ddcKeyboard.h>
 #include <ddcDef.h>
@@ -311,7 +312,6 @@ int main(void)
 	cursor_clear();
 	srand(time(0));
 	int n = 40;
-	struct fluid_cell* fc = make_fluid_cell(n, 6, 4, 0.000001);
 /*
 	for (int x = 1; x < n-35; x++)
 	{
@@ -335,15 +335,38 @@ int main(void)
 			}
 		}
 	}
-*/
-	for (int x = 10; x < n-11; x++)
+	for (int x = 1; x < 10; x++)
 	{
-		for (int y = 1; y < n-10; y++)
+		for (int y = 1; y < 10; y++)
 		{
 			for (int z = 1; z < n-1; z++)
 			{
 				fluid_cell_add_density(fc, x, y, z, rand()%255000);
-				fluid_cell_add_velocity(fc, x, y, z, 80, 100000, 10);
+				fluid_cell_add_velocity(fc, x, y, z, (rand()%100000), (rand()%100000), 10);
+			}
+		}
+	}
+	for (int x = 30; x < n-1; x++)
+	{
+		for (int y = 30; y < n-1; y++)
+		{
+			for (int z = 1; z < n-1; z++)
+			{
+				fluid_cell_add_density(fc, x, y, z, rand()%255000);
+				fluid_cell_add_velocity(fc, x, y, z, -(rand()%100000), -(rand()%100000), 10);
+			}
+		}
+	}
+*/
+	struct fluid_cell* fc = make_fluid_cell(n, 1, 400, 0.000001);
+	for (int x = 1; x < n-1; x++)
+	{
+		for (int y = 1; y < n-1; y++)
+		{
+			for (int z = 1; z < n-1; z++)
+			{
+				fluid_cell_add_density(fc, x, y, z, rand()%2550000);
+				fluid_cell_add_velocity(fc, x, y, z, rand()%10000, rand()%10000, 0);
 			}
 		}
 	}
@@ -353,19 +376,31 @@ int main(void)
 	{
 		if (key == 'a')
 		{
-			fluid_cell_add_velocity(fc, 20, 20, 20, 90, 90, 90);
-			fluid_cell_add_density(fc, 20, 20, 20, 100);
+			for (int x = 20; x < 30; x++)
+			{
+				for (int y = 20; y < 30; y++)
+				{
+					for (int z = 1; z < n-1; z++)
+					{
+						fluid_cell_add_velocity(fc, x, y, z, -100000, -100000, 0);
+					}
+				}
+			}
 		}
 		fluid_cell_step(fc);
-		float total = 0;
+		float min = 1000000000000000;
+		float max = 0;
 		for (int x = 1; x < n-1; x++)
 		{
 			for (int y = 1; y < n-1; y++)
 			{
-				for (int z = 1; z < n-1; z++)
+				float total = 0;
+				for (int z = 1; z < 2; z++)
 				{
-					total += fc->density[IDX(x, y, z, n)];
+					total += (fc->density[IDX(x, y, z, n)]);
 				}
+				if (total < min) min = total;
+				if (total > max) max = total;
 			}
 		}
 		
@@ -374,11 +409,11 @@ int main(void)
 			for (int y = 1; y < n-1; y++)
 			{
 				float val = 0;
-				for (int z = 1; z < n-1; z++)
+				for (int z = 1; z < 2; z++)
 				{
 					val += (fc->density[IDX(x, y, z, n)]);
 				}
-				val /= 100000;
+				val = ddMath_mapf(val, 0.0, 2550000, 0.0, 255.0);
 				cursor_move_to(0, n+2);
 				ddPrintf("\x1b[38;2;255;255;255mtd: %f\n", val);
 				if (val < 0) val = 0;
