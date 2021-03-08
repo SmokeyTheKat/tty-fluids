@@ -17,7 +17,7 @@ void fluid_set_bounds(int b, float* x, int n);
 void fluid_linear_solve(int b, float* x, float* x0, float a, float c, int iter, int n);
 void fluid_diffuse(int b, float* x, float* x0, float diff, float dt, int iter, int n);
 void fluid_project(float* vx, float* vy, float* vz, float* p, float* div, int iter, int n);
-static void fluid_advect(int b, float *d, float *d0,  float *velocX, float *velocY, float *velocZ, float dt, int N);
+static void fluid_advect(int b, float *d, float *d0,  float *velocX, float *velocY, float *velocZ, float dt, int n);
 
 struct color
 {
@@ -229,44 +229,44 @@ void fluid_project(float* vx, float* vy, float* vz, float* p, float* div, int it
 	fluid_set_bounds(2, vy, n);
 	fluid_set_bounds(3, vz, n);
 }
-static void fluid_advect(int b, float *d, float *d0,  float *velocX, float *velocY, float *velocZ, float dt, int N)
+static void fluid_advect(int b, float *d, float *d0,  float *velocX, float *velocY, float *velocZ, float dt, int n)
 {
 	float i0, i1, j0, j1, k0, k1;
 
-	float dtx = dt * (N - 2);
-	float dty = dt * (N - 2);
-	float dtz = dt * (N - 2);
+	float dtx = dt * (n - 2);
+	float dty = dt * (n - 2);
+	float dtz = dt * (n - 2);
 
 	float s0, s1, t0, t1, u0, u1;
 	float tmp1, tmp2, tmp3, x, y, z;
 
-	float Nfloat = N;
+	float nfloat = n;
 	float ifloat, jfloat, kfloat;
 	int i, j, k;
 
-	for(k = 1, kfloat = 1; k < N - 1; k++, kfloat++)
+	for(k = 1, kfloat = 1; k < n - 1; k++, kfloat++)
 	{
-		for(j = 1, jfloat = 1; j < N - 1; j++, jfloat++)
+		for(j = 1, jfloat = 1; j < n - 1; j++, jfloat++)
 		{
-			for(i = 1, ifloat = 1; i < N - 1; i++, ifloat++)
+			for(i = 1, ifloat = 1; i < n - 1; i++, ifloat++)
 			{
-				tmp1 = dtx * velocX[IDX(i, j, k, N)];
-				tmp2 = dty * velocY[IDX(i, j, k, N)];
-				tmp3 = dtz * velocZ[IDX(i, j, k, N)];
+				tmp1 = dtx * velocX[IDX(i, j, k, n)];
+				tmp2 = dty * velocY[IDX(i, j, k, n)];
+				tmp3 = dtz * velocZ[IDX(i, j, k, n)];
 				x    = ifloat - tmp1; 
 				y    = jfloat - tmp2;
 				z    = kfloat - tmp3;
 
 				if (x < 0.5f) x = 0.5f; 
-				if (x > Nfloat + 0.5f) x = Nfloat + 0.5f; 
+				if (x > nfloat + 0.5f) x = nfloat + 0.5f; 
 				i0 = floorf(x); 
 				i1 = i0 + 1.0f;
 				if (y < 0.5f) y = 0.5f; 
-				if (y > Nfloat + 0.5f) y = Nfloat + 0.5f; 
+				if (y > nfloat + 0.5f) y = nfloat + 0.5f; 
 				j0 = floorf(y);
 				j1 = j0 + 1.0f; 
 				if (z < 0.5f) z = 0.5f;
-				if (z > Nfloat + 0.5f) z = Nfloat + 0.5f;
+				if (z > nfloat + 0.5f) z = nfloat + 0.5f;
 				k0 = floorf(z);
 				k1 = k0 + 1.0f;
 
@@ -284,18 +284,18 @@ static void fluid_advect(int b, float *d, float *d0,  float *velocX, float *velo
 				int k0i = k0;
 				int k1i = k1;
 
-				d[IDX(i, j, k, N)] = s0 * (t0 * (u0 * d0[IDX(i0i, j0i, k0i, N)] +
-							      u1 * d0[IDX(i0i, j0i, k1i, N)]) +
-						       (t1 * (u0 * d0[IDX(i0i, j1i, k0i, N)] +
-							      u1 * d0[IDX(i0i, j1i, k1i, N)]))) +
-						  s1 * (t0 * (u0 * d0[IDX(i1i, j0i, k0i, N)] +
-							      u1 * d0[IDX(i1i, j0i, k1i, N)]) +
-						       (t1 * (u0 * d0[IDX(i1i, j1i, k0i, N)] +
-							      u1 * d0[IDX(i1i, j1i, k1i, N)])));
+				d[IDX(i, j, k, n)] = s0 * (t0 * (u0 * d0[IDX(i0i, j0i, k0i, n)] +
+							      u1 * d0[IDX(i0i, j0i, k1i, n)]) +
+						       (t1 * (u0 * d0[IDX(i0i, j1i, k0i, n)] +
+							      u1 * d0[IDX(i0i, j1i, k1i, n)]))) +
+						  s1 * (t0 * (u0 * d0[IDX(i1i, j0i, k0i, n)] +
+							      u1 * d0[IDX(i1i, j0i, k1i, n)]) +
+						       (t1 * (u0 * d0[IDX(i1i, j1i, k0i, n)] +
+							      u1 * d0[IDX(i1i, j1i, k1i, n)])));
 			}
 		}
 	}
-	fluid_set_bounds(b, d, N);
+	fluid_set_bounds(b, d, n);
 }
 
 char key = 0;
@@ -311,15 +311,39 @@ int main(void)
 	cursor_clear();
 	srand(time(0));
 	int n = 40;
-	struct fluid_cell* fc = make_fluid_cell(n, 4, 4, 0.00001);
-	for (int x = 1; x < n-1; x++)
+	struct fluid_cell* fc = make_fluid_cell(n, 6, 4, 0.000001);
+/*
+	for (int x = 1; x < n-35; x++)
 	{
 		for (int y = 1; y < n-1; y++)
 		{
 			for (int z = 1; z < n-1; z++)
 			{
-				fluid_cell_add_density(fc, x, y, z, rand()%1000/10);
-				fluid_cell_add_velocity(fc, x, y, z, 80, 80, 80);
+				fluid_cell_add_density(fc, x, y, z, rand()%255000);
+				fluid_cell_add_velocity(fc, x, y, z, 8000, 10, 10);
+			}
+		}
+	}
+	for (int x = 34; x < n-1; x++)
+	{
+		for (int y = 1; y < n-1; y++)
+		{
+			for (int z = 1; z < n-1; z++)
+			{
+				fluid_cell_add_density(fc, x, y, z, rand()%255000);
+				fluid_cell_add_velocity(fc, x, y, z, 80, 8000, 10);
+			}
+		}
+	}
+*/
+	for (int x = 10; x < n-11; x++)
+	{
+		for (int y = 1; y < n-10; y++)
+		{
+			for (int z = 1; z < n-1; z++)
+			{
+				fluid_cell_add_density(fc, x, y, z, rand()%255000);
+				fluid_cell_add_velocity(fc, x, y, z, 80, 100000, 10);
 			}
 		}
 	}
@@ -344,8 +368,6 @@ int main(void)
 				}
 			}
 		}
-		cursor_move_to(0, n+2);
-		ddPrintf("\x1b[38;2;255;255;255mtd: %f\n", total);
 		
 		for (int x = 1; x < n-1; x++)
 		{
@@ -354,9 +376,13 @@ int main(void)
 				float val = 0;
 				for (int z = 1; z < n-1; z++)
 				{
-					val += fc->density[IDX(x, y, z, n)];
+					val += (fc->density[IDX(x, y, z, n)]);
 				}
-				//if (val < 0) val = 0;
+				val /= 100000;
+				cursor_move_to(0, n+2);
+				ddPrintf("\x1b[38;2;255;255;255mtd: %f\n", val);
+				if (val < 0) val = 0;
+				if (val > 255) val = 255;
 				cursor_move_to(x*2, y);
 				ddPrintf("\x1b[38;2;%d;%d;%dm██", (int)val, (int)val, (int)val);
 			}
